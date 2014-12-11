@@ -47,19 +47,19 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
     var startTime = null;
     var el = this;
 
-    var cancelOnEvents = 'scroll mousedown mousewheel touchmove keydown';
-    var cancelScrollAnimation = function($event) {
-      if (!$event || $event.which > 0) {
-        el.unbind(cancelOnEvents, cancelScrollAnimation);
-        cancelAnimation(scrollAnimation);
-        deferred.reject();
-        scrollAnimation = null;
-      }
-    };
+//     var cancelOnEvents = 'scroll mousedown mousewheel touchmove keydown';
+//     var cancelScrollAnimation = function($event) {
+//       if (!$event || $event.which > 0) {
+//         el.unbind(cancelOnEvents, cancelScrollAnimation);
+//         cancelAnimation(scrollAnimation);
+//         deferred.reject();
+//         scrollAnimation = null;
+//       }
+//     };
 
-    if(scrollAnimation) {
-      cancelScrollAnimation();
-    }
+//     if(scrollAnimation) {
+//       cancelScrollAnimation();
+//     }
     deferred = $q.defer();
 
     if(!deltaLeft && !deltaTop) {
