@@ -113,7 +113,7 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
       if(percent < 1) {
         scrollAnimation = requestAnimation(animationStep);
       } else {
-        el.unbind(cancelOnEvents, cancelScrollAnimation);
+//         el.unbind(cancelOnEvents, cancelScrollAnimation);
         scrollAnimation = null;
         deferred.resolve();
       }
@@ -122,7 +122,7 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
     //Fix random mobile safari bug when scrolling to top by hitting status bar
     el.duScrollTo(startLeft, startTop);
 
-    el.bind(cancelOnEvents, cancelScrollAnimation);
+//     el.bind(cancelOnEvents, cancelScrollAnimation);
 
     scrollAnimation = requestAnimation(animationStep);
     return deferred.promise;
