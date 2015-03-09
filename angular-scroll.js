@@ -26,7 +26,9 @@ angular.module('duScroll', [
   //Default offset for smoothScroll directive
   .value('duScrollOffset', 0)
   //Default easing function for scroll animation
-  .value('duScrollEasing', duScrollDefaultEasing);
+  .value('duScrollEasing', duScrollDefaultEasing)
+  //Whether or not to activate the last scrollspy, when page/container bottom is reached
+  .value('duScrollBottomSpy', false);
 
 
 angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
@@ -75,22 +77,22 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
         deltaLeft = Math.round(left - startLeft),
         deltaTop = Math.round(top - startTop);
 
-    var startTime = null;
+    var startTime = null, progress = 0;
     var el = this;
 
-//     var cancelOnEvents = 'scroll mousedown mousewheel touchmove keydown';
-//     var cancelScrollAnimation = function($event) {
-//       if (!$event || $event.which > 0) {
-//         el.unbind(cancelOnEvents, cancelScrollAnimation);
-//         cancelAnimation(scrollAnimation);
-//         deferred.reject();
-//         scrollAnimation = null;
-//       }
-//     };
+    // var cancelOnEvents = 'scroll mousedown mousewheel touchmove keydown';
+    // var cancelScrollAnimation = function($event) {
+    //   if (!$event || (progress && $event.which > 0)) {
+    //     el.unbind(cancelOnEvents, cancelScrollAnimation);
+    //     cancelAnimation(scrollAnimation);
+    //     deferred.reject();
+    //     scrollAnimation = null;
+    //   }
+    // };
 
-//     if(scrollAnimation) {
-//       cancelScrollAnimation();
-//     }
+    // if(scrollAnimation) {
+    //   cancelScrollAnimation();
+    // }
     deferred = $q.defer();
 
     if(duration === 0 || (!deltaLeft && !deltaTop)) {
@@ -106,7 +108,7 @@ angular.module('duScroll.scrollHelpers', ['duScroll.requestAnimation'])
         startTime = timestamp;
       }
 
-      var progress = timestamp - startTime;
+      progress = timestamp - startTime;
       var percent = (progress >= duration ? 1 : easing(progress/duration));
 
       el.scrollTo(
@@ -239,7 +241,7 @@ angular.module('duScroll.requestAnimation', ['duScroll.polyfill'])
 
 
 angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
-.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait) {
+.factory('spyAPI', ["$rootScope", "$timeout", "$window", "$document", "scrollContainerAPI", "duScrollGreedy", "duScrollSpyWait", "duScrollBottomSpy", function($rootScope, $timeout, $window, $document, scrollContainerAPI, duScrollGreedy, duScrollSpyWait, duScrollBottomSpy) {
   'use strict';
 
   var createScrollHandler = function(context) {
@@ -255,9 +257,9 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
         containerOffset = containerEl.getBoundingClientRect().top;
         bottomReached = Math.round(containerEl.scrollTop + containerEl.clientHeight) >= containerEl.scrollHeight;
       } else {
-        bottomReached = Math.round($window.scrollY + $window.innerHeight) >= $document[0].body.scrollHeight;
+        bottomReached = Math.round($window.pageYOffset + $window.innerHeight) >= $document[0].body.scrollHeight;
       }
-      var compareProperty = (bottomReached ? 'bottom' : 'top')
+      var compareProperty = (duScrollBottomSpy && bottomReached ? 'bottom' : 'top');
 
       var i, currentlyActive, toBeActive, spies, spy, pos;
       spies = context.spies;
@@ -269,7 +271,7 @@ angular.module('duScroll.spyAPI', ['duScroll.scrollContainerAPI'])
         pos = spy.getTargetPosition();
         if (!pos) continue;
 
-        if(bottomReached || (pos.top + spy.offset - containerOffset < 20 && (duScrollGreedy || pos.top*-1 + containerOffset) < pos.height)) {
+        if((duScrollBottomSpy && bottomReached) || (pos.top + spy.offset - containerOffset < 20 && (duScrollGreedy || pos.top*-1 + containerOffset) < pos.height)) {
           //Find the one closest the viewport top or the page bottom if it's reached
           if(!toBeActive || toBeActive[compareProperty] < pos[compareProperty]) {
             toBeActive = {
